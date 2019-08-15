@@ -46,7 +46,10 @@ class larryTheMeatEater_env(gym.Env):
 		elif action == 'd':
 			self.player_pos[0] = min(self.world_size[0]-1, self.player_pos[0]+1)
 		
-		if self.player_pos == self.end_pos:
+		# TODO fix rewards
+		if self.player_pos in self.death_pos:
+			self.game_over = True
+		elif self.player_pos == self.end_pos:
 			self.game_over = True
 			#self.reset()
 		self.render()
@@ -68,6 +71,15 @@ class larryTheMeatEater_env(gym.Env):
 		for x in range(self.world_size[0]*self.world_size[1]):
 			self.world.append(' ')
 
+		# Put win location on board
+		win_pos = self.end_pos[0] + self.end_pos[1]*8
+		self.world[win_pos] = 'X'
+
+		self.death_pos = [[0,1], [1,1], [3,1], [2,3], [5,0]]
+		for death in self.death_pos:
+			d_p = death[0] + death[1]*8
+			self.world[d_p] = u"\u2588"
+		
 		# To pevent same address
 		self.player_pos[0] = self.start_pos[0]
 		self.player_pos[1] = self.start_pos[1]
@@ -76,12 +88,6 @@ class larryTheMeatEater_env(gym.Env):
 
 		self.world[self.player_pos[0] + self.player_pos[1]*8] = 'H'
 
-		# Put win location on board
-		win_pos = self.end_pos[0] + self.end_pos[1]*8
-		self.world[win_pos] = 'X'
-
-		## TODO: Put death locations on board
-		
 		self.game_over = False
 		self.reward = 0
 		
@@ -110,8 +116,6 @@ class larryTheMeatEater_env(gym.Env):
 
 		#self.screen.addstr(4,2, "({},{})".format(self.end_pos[0], self.end_pos[1]))
 		#self.screen.addstr(5,2, "({},{})".format(self.player_pos[0], self.player_pos[1]))
-
-		#self.screen.addstr(8,8, u"\u2588")
 
 		self.screen.refresh()
 
